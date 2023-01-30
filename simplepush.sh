@@ -21,21 +21,27 @@ main() {
 		is_encrypted=true
 	} ||
 		is_encrypted=false
-		
+
 	# Set curl options
 	set -- \
-		--silent \
+		--silent
+
+	[ ${#I[@]} -gt 0 ] &&
+		set -- "$@" \
+			${I[@]}
+
+	set -- "$@" \
 		--data-urlencode "key=$key" \
-		--data-urlencode "msg=$message" \
-	
+		--data-urlencode "msg=$message"
+
 	$is_encrypted &&
 		set -- "$@" \
 			--data-urlencode "encrypted=true" \
 			--data-urlencode "iv=$iv"
-	
+
 	[ -n "$title" ] &&
 		set -- "$@" --data-urlencode "title=$title"
-	
+
 	[ -n "$event" ] &&
 		set -- "$@" --data-urlencode "event=$event"
 
@@ -49,13 +55,14 @@ usage() {
 
 Push notifications using Simplepush
 
-	-e <event>    Event name
-	-k <key>      Simplepush key
-	-p <pass>     Encryption password
-	-s <salt>     Encryption salt
-	-t <title>    Title of the push message
-	-m <message>  Message to push
-	-h	      Display this help text and exit"
+	-I <interface>  Interface to use
+	-e <event>      Event name
+	-k <key>        Simplepush key
+	-p <pass>       Encryption password
+	-s <salt>       Encryption salt
+	-t <title>      Title of the push message
+	-m <message>    Message to push
+	-h	        Display this help text and exit"
 
 	[ $# -gt 0 ] && {
 		exec >&2
@@ -72,8 +79,9 @@ parse_options() {
 	salt=${SIMPLEPUSH_SALT:-1789F0B8C4A051E5}
 	has_message=false
 
-	while getopts :e:k:m:p:s:t:h opt; do
+	while getopts :I:e:k:m:p:s:t:h opt; do
 		case $opt in
+			I) I=(); I+=( "--interface" ); I+=( "${OPTARG}" ) ;;
 			e) event=$OPTARG ;;
 			k) key=$OPTARG ;;
 			m) message=$OPTARG; has_message=true ;;
