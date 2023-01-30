@@ -38,8 +38,8 @@ main() {
 	
 	[ -n "$event" ] &&
 		set -- "$@" --data-urlencode "event=$event"
-	
-	curl "$@" "$api_url"
+
+	timeout -k 15s 10s curl "$@" "$api_url" > /dev/null 2>&1
 }
 
 usage() {
